@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 require 'ADB'
 require 'ipaddr'
-require 'thread'
 
 ip_range = IPAddr.new(ARGV[0]).to_range.to_a 
 abort "Please pass an ip range as first arg" unless ip_range
@@ -29,22 +28,18 @@ puts "Scan started..."
 
 queue = Queue.new
 ip_range.each { |ip| queue << ip}
-threads = Array.new
 
-# (queue.size / 10).times do
-	# threads << Thread.new do
-		begin
-			ip = queue.pop(true)
-			print "#{ip}\r"
-			adb.connect(ip.to_s, port, timeout)
-			puts "Device found! #{ip}"
-		rescue ThreadError
-			nil
-		rescue
-			retry	
-		end	
-	# end
-# end
+begin
+	ip = queue.pop(true)
+	print "#{ip}\r"
+	adb.connect(ip.to_s, port, timeout)
+	puts "Device found! #{ip}"
+rescue ThreadError
+	nil
+rescue
+	retry	
+end	
+
 puts "\nScan complete"
 puts "Connected devices: #{adb.devices}"
 
